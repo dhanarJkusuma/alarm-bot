@@ -8,9 +8,10 @@ db.sequelize.sync();
 /** Discord Commends */
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
-const botCommands = require('./commands')(db);
+const botCommands = require('./commands')();
+
 Object.keys(botCommands).map(key => {
-  bot.commands.set(botCommands[key].name, botCommands[key]);
+    bot.commands.set(botCommands[key].name, botCommands[key]);
 });
 const TOKEN = process.env.TOKEN;
 bot.login(TOKEN);

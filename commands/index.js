@@ -1,7 +1,10 @@
-module.exports = (dbRef) => {
+module.exports = () => {
     var cmdModules = {};
     cmdModules.Ping = require('./ping');
-    cmdModules.Reminder = require('./reminder')(dbRef);
+    cmdModules.Reminder = require('./reminder');
+    cmdModules.Reminders = require('./reminders');
+    cmdModules.Remove = require('./remove');
+    cmdModules.Show = require('./show');
     return cmdModules;
 };
   
