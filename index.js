@@ -24,7 +24,8 @@ bot.on('ready', () => {
 /** Listen Message */
 bot.on('message', msg => {
     const args = msg.content.split(/ +/);
-    if(args[0] !== '!mei') return;
+    // if(args[0] !== '!mei') return;
+    if (!msg.mentions.has(bot.user.id)) return;
     args.shift();
     const command = args.shift().toLowerCase();
     if (!bot.commands.has(command)) return;
