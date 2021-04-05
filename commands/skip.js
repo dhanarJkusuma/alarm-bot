@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '../.env' });
 const reminderCtrl = require('../controllers/reminder.controller');
 
 module.exports = {
@@ -23,10 +24,13 @@ module.exports = {
             msg.channel.send(message);
             return;
         }
-
-        var message = `Hello <@${uid}>, \nYour reminder ${name} has been skiped :smile: \nWill remind you again on ${result.data.next_execute}`;
+        
+        var message;
         if(result.error != ''){
             message = `Hey  <@${uid}>, ` + result.error;
+        }else{
+            let next = result.data.next_execute.toLocaleString(process.env.DATE_LOCALE);
+            message = `Hello <@${uid}>, \nYour reminder ${name} has been skiped :smile: \nWill remind you again on ${next}`;
         }
         msg.channel.send(message);
     },

@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '../.env' });
 const reminderCtrl = require('../controllers/reminder.controller');
 
 module.exports = {
@@ -22,7 +23,8 @@ module.exports = {
         if(result.error != ''){
             message = `Hello <@${uid}>, ${result.error}`
         }else{
-            message = `Hello <@${uid}>, \nYour reminder ${name} has been confirmed :smile: \nWill remind you again on ${result.data.next_execute}`;
+            let next = result.data.next_execute.toLocaleString(process.env.DATE_LOCALE);
+            message = `Hello <@${uid}>, \nYour reminder ${name} has been confirmed :smile: \nWill remind you again on ${next}`;
             if(result.error != ''){
                 message = `Hey  <@${uid}>, ` + result.error;
             }
