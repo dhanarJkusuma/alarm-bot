@@ -29,7 +29,7 @@ module.exports = {
         if(result.error != ''){
             message = `Hey  <@${uid}>, ` + result.error;
         }else{
-            let next = result.data.next_execute.toLocaleString(process.env.DATE_LOCALE);
+            let next = result.data.next_execute.toLocaleString(process.env.DATE_LOCALE, { timeZone: process.env.TIMEZONE });
             message = `Hello <@${uid}>, \nYour reminder ${name} has been skiped :smile: \nWill remind you again on ${next}`;
         }
         msg.channel.send(message);
