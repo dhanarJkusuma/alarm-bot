@@ -151,7 +151,6 @@ exports.skip = async (data) => {
             };
         }
 
-        let now = new Date();
         let next = parseMultiplier(now, data.multiplier);
         scheduler.next_execute = next;
         await Scheduler.update({
