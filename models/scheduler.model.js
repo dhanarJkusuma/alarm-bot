@@ -26,6 +26,10 @@ module.exports = (sequelize, Sequelize) => {
         multiplier: {
             type: Sequelize.STRING,
             allowNull: false
+        },
+        confirmed: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
         }
     },{
         /** indexes */
@@ -33,9 +37,12 @@ module.exports = (sequelize, Sequelize) => {
             {
                 unique: true,
                 fields: ['user_id','name']
+            },
+            {
+                name: 'reminder_idx',
+                fields: ['next_execute', 'confirmed']
             }
         ],
-        createdAt: 'next_execute'
     });
     return Scheduler;
   };

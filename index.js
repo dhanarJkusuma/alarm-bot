@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const Discord = require('discord.js');
+const Cron = require('node-cron');
 const db = require("./models");
 db.sequelize.sync();
 
@@ -36,4 +37,26 @@ bot.on('message', msg => {
         console.error(error);
         msg.reply('there was an error trying to execute that command!');
     }
+});
+
+/** Cron */
+const reminderCtrl = require('./controllers/reminder.controller');
+
+Cron.schedule('* * * * *',  async function() {
+    console.log('[Process] Notify Message using cron:');
+
+    let now = new Date();
+    let reminders = await reminderCtrl.reminder(now);
+    var message = `Hello Travellers, \nJust remind you about: \n`;
+    for (i = 0; i < reminders.data.length; i++) {
+        let item = reminders.data[i];
+        let hours = Math.abs(now - item.next_execute) / 36e5;
+        
+        if(hours <= parseInt(process.env.MAX_COUNTER)){
+            message += `>> <@${item.user_id}> : ${item.name}\n`;
+        }
+    } 
+    console.log(process.env.CHANNEL_ID);
+    console.log(bot.channels.get(process.env.CHANNEL_ID));
+    bot.channels.get(process.env.CHANNEL_ID).send(message);
 });
