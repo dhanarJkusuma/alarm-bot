@@ -4,10 +4,13 @@ module.exports = {
     name: 'confirm',
     description: 'Confirm scheduler',
     async execute(msg, args) {
-
         const uid = msg.author.id;
+        if(args.length < 1){
+            msg.channel.send(`Hello <@${uid}>,  Please input with proper args\n`);
+            return;
+        }
+
         const name = args[0];
-    
         let result = await reminderCtrl.confirm(uid, name);
         if(!result.success){
             message = `Hello <@${uid}>, \nError while confirm  your reminder :cry:  \nError: ${result.error} \n`;
@@ -15,10 +18,17 @@ module.exports = {
             return;
         }
 
-        var message = `Hello <@${uid}>, \nYour reminder ${name} has been confirmed :smile: \nWill remind you again at ${result.data.next}`;
+        var message;
         if(result.error != ''){
-            message = `Hey  <@${uid}>, ` + result.error;
+            message = `Hello <@${uid}>, ${result.error}`
+        }else{
+            message = `Hello <@${uid}>, \nYour reminder ${name} has been confirmed :smile: \nWill remind you again on ${result.data.next_execute}`;
+            if(result.error != ''){
+                message = `Hey  <@${uid}>, ` + result.error;
+            }
         }
+
+        
         msg.channel.send(message);
     },
 };

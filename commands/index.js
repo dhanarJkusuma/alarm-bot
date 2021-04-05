@@ -7,6 +7,7 @@ module.exports = () => {
     cmdModules.Show = require('./show');
     cmdModules.Confirm = require('./confirm');
     cmdModules.Skip = require('./skip');
+    cmdModules.Help = require('./help');
     return cmdModules;
 };
   

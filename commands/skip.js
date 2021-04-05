@@ -4,8 +4,12 @@ module.exports = {
     name: 'skip',
     description: 'Skip scheduler',
     async execute(msg, args) {
-
         const uid = msg.author.id;
+        if(args.length < 2){
+            msg.channel.send(`Hello <@${uid}>,  Please input with proper args\n`);
+            return;
+        }
+
         const name = args[0];
         const multiplier = args[1];
     
@@ -20,7 +24,7 @@ module.exports = {
             return;
         }
 
-        var message = `Hello <@${uid}>, \nYour reminder ${name} has been skiped :smile: \nWill remind you again at ${result.data.next}`;
+        var message = `Hello <@${uid}>, \nYour reminder ${name} has been skiped :smile: \nWill remind you again on ${result.data.next_execute}`;
         if(result.error != ''){
             message = `Hey  <@${uid}>, ` + result.error;
         }

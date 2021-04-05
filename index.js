@@ -42,21 +42,32 @@ bot.on('message', msg => {
 /** Cron */
 const reminderCtrl = require('./controllers/reminder.controller');
 
-Cron.schedule('* * * * *',  async function() {
-    console.log('[Process] Notify Message using cron:');
+Cron.schedule('0 * * * *',  async function() {
+    try{
+        console.log('[Mei Bot] Notify Message using cron:');
 
-    let now = new Date();
-    let reminders = await reminderCtrl.reminder(now);
-    var message = `Hello Travellers, \nJust remind you about: \n`;
-    for (i = 0; i < reminders.data.length; i++) {
-        let item = reminders.data[i];
-        let hours = Math.abs(now - item.next_execute) / 36e5;
-        
-        if(hours <= parseInt(process.env.MAX_COUNTER)){
-            message += `>> <@${item.user_id}> : ${item.name}\n`;
+        let now = new Date();
+        let start = new Date(now);
+        start.setHours(start.getHours() - parseInt(process.env.MAX_COUNTER));
+
+        let reminders = await reminderCtrl.reminder(start, now);
+        if(reminders.data.length == 0){
+            return;
         }
-    } 
-    console.log(process.env.CHANNEL_ID);
-    console.log(bot.channels.get(process.env.CHANNEL_ID));
-    bot.channels.get(process.env.CHANNEL_ID).send(message);
+        
+        var message = `Hello Travellers, \nJust remind you about: \n`;
+        for (i = 0; i < reminders.data.length; i++) {
+            let item = reminders.data[i];
+            let hours = (now - item.next_execute) / 36e5;
+            
+            if(hours <= parseInt(process.env.MAX_COUNTER)){
+                message += `>> <@${item.user_id}> : ${item.name}\n`;
+            }
+        }
+        message += `Please confirm to stop your reminder, or skip to remind you later.`;
+        bot.channels.cache.get(process.env.CHANNEL_ID).send(message);
+    }catch(error){
+        console.log("[Mei Bot] error cron: ", error);
+    }
+    
 });

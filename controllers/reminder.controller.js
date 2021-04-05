@@ -10,6 +10,13 @@ exports.recordReminder = async (data) => {
     var error_msg = "";
     try{
         const nextDate = parseMultiplier(data.executed, data.multiplier);
+        if(nextDate == null){
+            error_msg = "Please input with proper repeat flag";
+            return {
+                success,
+                error: error_msg
+            };
+        }
         await Scheduler.create({
             user_id: data.user_id,
             name: data.name,
@@ -122,9 +129,11 @@ exports.skip = async (data) => {
             };
         }
 
-        let flag = getFlag(data.multiplier);
-        if(flag != 'h'){
-            error_msg = `You can skip this reminder in just a few hours :pleading_face:`;
+        let now = new Date();
+        if(scheduler.next_execute > now){
+            error_msg = `Cannot skip reminder ${data.name} :expressionless: \n`;
+            error_msg += `This reminder is too far away`;
+
             return {
                 success,
                 error: error_msg,
@@ -132,8 +141,19 @@ exports.skip = async (data) => {
             };
         }
 
-        let next = parseMultiplier(scheduler.next_execute, data.multiplier);
+        let flag = getFlag(data.multiplier);
+        if(flag != 'h'){
+            error_msg = `You can only skip this reminder in a few hours :pleading_face:`;
+            return {
+                success,
+                error: error_msg,
+                data: null
+            };
+        }
 
+        let now = new Date();
+        let next = parseMultiplier(now, data.multiplier);
+        scheduler.next_execute = next;
         await Scheduler.update({
             confirmed: true,
             next_execute: next
@@ -154,9 +174,7 @@ exports.skip = async (data) => {
     return {
         success,
         error: error_msg,
-        data: {
-            next: next
-        }
+        data: scheduler
     };
 }
 
@@ -170,11 +188,11 @@ exports.confirm = async (uid, name) => {
         transaction = await sequelize.transaction();
 
         scheduler = await Scheduler.findOne({ where: { 
-            user_id: data.uid, 
-            name: data.name 
+            user_id: uid, 
+            name: name 
         }, raw: true, transaction: transaction, lock: true });
         if (scheduler === null) {
-            error_msg = `Your reminder with name ${data.name} is not found :triumph:`;
+            error_msg = `Your reminder with name ${name} is not found :triumph:`;
 
             return {
                 success,
@@ -183,8 +201,20 @@ exports.confirm = async (uid, name) => {
             };
         }
 
-        let next = parseMultiplier(scheduler.last_executed, data.multiplier);
+        let now = new Date();
+        if(scheduler.next_execute > now){
+            error_msg = `No need to confirm reminder ${name} :expressionless: \n`;
+            error_msg += `This reminder is too far away`;
 
+            return {
+                success,
+                error: error_msg,
+                data: null
+            };
+        }
+
+        let next = parseMultiplier(scheduler.last_executed, scheduler.multiplier);
+        scheduler.next_execute = next;
         await Scheduler.update({
             confirmed: true,
             next_execute: next
@@ -205,18 +235,19 @@ exports.confirm = async (uid, name) => {
     return {
         success,
         error: error_msg,
-        data: scheduler
+        data: scheduler,
+        next
     };
 }
 
-exports.reminder = async (date) => {
+exports.reminder = async (from, end) => {
     var success = true;
     var error_msg = "";
     var schedulers = [];
     try{
         schedulers = await Scheduler.findAll({ where: { 
             next_execute: {
-                [Op.lte]: date
+                [Op.between]: [from, end]
             },
             confirmed: false
         }, raw: true });
@@ -239,8 +270,12 @@ const getFlag = (multiplier) => {
 }
 
 const parseMultiplier = (date, multiplier) => {
+    let value = multiplier.substr(0, multiplier.length - 1);
+    if(!isNumeric(value)){
+        return null;
+    }
     let m = multiplier.substr(multiplier.length - 1);
-    let v = multiplier.length == 1 ? 1 : parseInt(multiplier.substr(0, multiplier.length - 1));
+    let v = multiplier.length == 1 ? 1 : parseInt(value);
     let d = new Date(date);
     switch(m){
         case "w":
@@ -250,10 +285,10 @@ const parseMultiplier = (date, multiplier) => {
             d.setDate(d.getDate() + v);
             return d;
         case "h":
-            d.setDate(d.getHours() + v );
+            d.setHours(d.getHours() + v);
             return d;
         default:
-            return d;
+            return null;
     }
 }
 
@@ -263,7 +298,17 @@ const parseMultiplierDescription = (multiplier) => {
     switch(m){
         case "w":
             return `Will remind you every ${v} week(s)`;
+        case "d":
+            return `Will remind you every ${v} day(s)`;
+        case "h":
+            return `Will remind you every ${v} hour(s)`;
         default:
             return `This reminder was broken, please remove this reminder!`;
     }
+}
+
+const isNumeric = (str) => {
+    if (typeof str != "string") return false;
+    return !isNaN(str) && 
+           !isNaN(parseFloat(str))
 }
