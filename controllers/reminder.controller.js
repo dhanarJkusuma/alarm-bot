@@ -182,6 +182,7 @@ exports.confirm = async (uid, name) => {
     var success = true;
     var error_msg = "";
     var scheduler = null;
+    var next = null;
 
     try {
         transaction = await sequelize.transaction();
@@ -212,7 +213,7 @@ exports.confirm = async (uid, name) => {
             };
         }
 
-        let next = parseMultiplier(scheduler.last_executed, scheduler.multiplier);
+        next = parseMultiplier(scheduler.last_executed, scheduler.multiplier);
         scheduler.next_execute = next;
         await Scheduler.update({
             confirmed: true,
