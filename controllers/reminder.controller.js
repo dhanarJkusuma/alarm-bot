@@ -154,7 +154,6 @@ exports.skip = async (data) => {
         let next = parseMultiplier(now, data.multiplier);
         scheduler.next_execute = next;
         await Scheduler.update({
-            confirmed: true,
             next_execute: next
         }, { 
             where: { id: scheduler.id }, 
@@ -216,7 +215,6 @@ exports.confirm = async (uid, name) => {
         next = parseMultiplier(scheduler.last_executed, scheduler.multiplier);
         scheduler.next_execute = next;
         await Scheduler.update({
-            confirmed: true,
             next_execute: next
         }, { 
             where: { id: scheduler.id }, 
@@ -249,7 +247,6 @@ exports.reminder = async (from, end) => {
             next_execute: {
                 [Op.between]: [from, end]
             },
-            confirmed: false
         }, raw: true });
 
     }catch(error){
