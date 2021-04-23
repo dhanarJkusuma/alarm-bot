@@ -1,8 +1,8 @@
 const reminderCtrl = require('../controllers/reminder.controller');
 
-const sendError = (uid, msg) => {
+const sendError = (o, uid, msg) => {
     let message = `Hello <@${uid}>, \nError while record your reminder :cry:  \nError: ${msg} \n`;
-    msg.channel.send(message);
+    o.channel.send(message);
 }
 
 module.exports = {
@@ -11,7 +11,7 @@ module.exports = {
     async execute(msg, args) {
         const uid = msg.author.id;
         if(args.length < 2){
-            sendError(uid, `Please input with proper args`);
+            sendError(msg, uid, `Please input with proper args`);
             return;
         }
 
@@ -22,7 +22,7 @@ module.exports = {
         // validate multiplier
         let value = flag.substr(0, flag.length - 1);
         if(!isNumeric(value)){
-            sendError(uid, `Please input with proper repeat flag`);
+            sendError(msg, uid, `Please input with proper repeat flag`);
             return;
         }
         let m = flag.substr(flag.length - 1);
@@ -30,13 +30,13 @@ module.exports = {
             case "d":
             case "w":
                 if(value < 1){
-                    sendError(uid, `Please input with multipler with a proper integer value`);
+                    sendError(msg, uid, `Please input with multipler with a proper integer value`);
                     return;
                 }
                 break;
             case "h":
                 if(value < 24){
-                    sendError(uid, `Please input with multipler with at least 24 hours / 1 day reminder`);
+                    sendError(msg, uid, `Please input with multipler with at least 24 hours / 1 day reminder`);
                     return;
                 }
                 break;
