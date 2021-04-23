@@ -5,6 +5,12 @@ const sendError = (o, uid, msg) => {
     o.channel.send(message);
 }
 
+const isNumeric = (str) => {
+    if (typeof str != "string") return false;
+    return !isNaN(str) && 
+           !isNaN(parseFloat(str))
+}
+
 module.exports = {
     name: 'reminder',
     description: 'Record reminder',
