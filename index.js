@@ -42,20 +42,20 @@ bot.on('message', msg => {
 /** Cron */
 const reminderCtrl = require('./controllers/reminder.controller');
 
-Cron.schedule('0 * * * *',  async function() {
+Cron.schedule('* * * * *',  async function() {
     try{
-        console.log('[Mei Bot] Notify Message using cron:');
+        console.log('[Reminder Bot] Notify Message using cron:');
 
         let now = new Date();
         let start = new Date(now);
-        start.setHours(start.getHours() - parseInt(process.env.MAX_COUNTER));
+        start.setMinutes(start.getMinutes() - parseInt(process.env.MAX_COUNTER));
 
         let reminders = await reminderCtrl.reminder(start, now);
         if(reminders.data.length == 0){
             return;
         }
         
-        var message = `Hello Travellers, \nJust remind you about: \n`;
+        var message = `Hi, \nJust remind you about: \n`;
         for (i = 0; i < reminders.data.length; i++) {
             let item = reminders.data[i];
             let hours = (now - item.next_execute) / 36e5;
@@ -65,9 +65,14 @@ Cron.schedule('0 * * * *',  async function() {
             }
         }
         message += `Please confirm to stop your reminder, or skip to remind you later.`;
-        bot.channels.cache.get(process.env.CHANNEL_ID).send(message);
+        bot.channels.cache.get(process.env.CHANNEL_ID).send(message); 
     }catch(error){
-        console.log("[Mei Bot] error cron: ", error);
+        console.log("[Reminder Bot] error cron: ", error);
     }
-    
+});
+
+
+Cron.schedule('0 1 * * *', async function(){
+    console.log('[Reminder Bot] Reload all called alarm:');
+    await reminderCtrl.reload();
 });

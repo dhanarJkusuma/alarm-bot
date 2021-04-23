@@ -15,7 +15,8 @@ const sequelize = new Sequelize(
             min: parseInt(process.env.DB_MIN_POOL),
             acquire: parseInt(process.env.DB_ACQUIRE),
             idle: parseInt(process.env.DB_IDLE)
-        }
+        },
+        logging: process.env.DEBUG === 'true'
     }
 );
 

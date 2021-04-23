@@ -25,14 +25,12 @@ module.exports = {
         if(result.error != ''){
             message = `Hey  <@${uid}>, ` + result.error;
         }else{
-            let last = result.data.last_executed.toLocaleString(process.env.DATE_LOCALE, { timeZone: process.env.TIMEZONE });
             let next = result.data.next_execute.toLocaleString(process.env.DATE_LOCALE, { timeZone: process.env.TIMEZONE });
 
             message = `Hello <@${uid}>, \nHere is detail of your reminder: \n`;
             message += `**${result.data.name}**\n`
             message += `--------------------------------------------- \n`;
             message += `${result.data.repeat}\n`;
-            message += `Last remind: ${last}\n`
             message += `Next remind: ${next}`
         }
 

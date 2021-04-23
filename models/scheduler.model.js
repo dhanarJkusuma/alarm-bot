@@ -34,10 +34,6 @@ module.exports = (sequelize, Sequelize) => {
         db_multiplier: {
             type: Sequelize.STRING,
             allowNull: false
-        },
-        confirmed: {
-            type: Sequelize.BOOLEAN,
-            defaultValue: false
         }
     },{
         /** indexes */

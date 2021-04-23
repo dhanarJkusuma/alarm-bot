@@ -8,6 +8,7 @@ const Op = model.Sequelize.Op;
 exports.recordReminder = async (data) => {
     var success = false;
     var error_msg = "";
+
     try{
         const nextDate = parseMultiplier(data.executed, data.multiplier);
         if(nextDate == null){
@@ -221,6 +222,7 @@ exports.confirm = async (uid, name) => {
         scheduler.scheduled_at = next;
         await Scheduler.update({
             next_execute: next,
+            scheduled_at: next
 
         }, { 
             where: { id: scheduler.id }, 
@@ -269,8 +271,21 @@ exports.reminder = async (from, end) => {
 }
 
 exports.reload = async () => {
-    // UPDATE scheduler s SET s.next_executed = DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier s.multiplier) WHERE s.next_executed < NOW();
-    const [results, metadata] = await sequelize.query("UPDATE schedulers s SET s.next_executed = DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier s.multiplier) WHERE s.next_executed < NOW()");
+    /**  
+        UPDATE schedulers s SET 
+            s.next_execute = 
+                CASE 
+                    WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) 
+                    WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY) 
+                END,
+            s.scheduled_at = 
+                CASE 
+                    WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) 
+                    WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY) 
+                END 
+        WHERE s.next_execute < NOW()
+    */ 
+    const [results, metadata] = await sequelize.query(`UPDATE schedulers s SET s.next_execute = CASE WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY) END, s.scheduled_at = CASE WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY) END WHERE s.next_execute < NOW()`);
     console.log(results);
     console.log(metadata);
 }
@@ -285,7 +300,7 @@ const parseMultiplier = (date, multiplier) => {
         return null;
     }
     let m = multiplier.substr(multiplier.length - 1);
-    let v = multiplier.length == 1 ? 1 : parseInt(value);
+    let v = parseInt(value);
     let d = new Date(date);
     switch(m){
         case "w":

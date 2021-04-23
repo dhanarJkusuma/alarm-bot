@@ -7,7 +7,7 @@ module.exports = {
 
         var message = `Welcome from mei bot :smile: \n`;
         message += `You can call me using this message:\n`;
-        message += "```@mei-bot <method> <args>```";
+        message += "```@alarm-bot <method> <args>```";
         message += `\n`;
         message += `Here is the methods available in mei bot:\n`;
         message += `- reminder: create new reminder. args: <reminder name> <repeat flag>\n`;
