@@ -44,8 +44,10 @@ const reminderCtrl = require('./controllers/reminder.controller');
 
 Cron.schedule('* * * * *',  async function() {
     try{
-        console.log('[Reminder Bot] Notify Message using cron:');
-
+        if(process.env.DEBUG === 'true'){
+            console.log('[Reminder Bot] Notify Message using cron:');
+        }
+        
         let now = new Date();
         let start = new Date(now);
         start.setMinutes(start.getMinutes() - parseInt(process.env.MAX_COUNTER));
