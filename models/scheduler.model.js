@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false,
         },
-        last_executed: {
+        scheduled_at: {
             type: Sequelize.DATE(),
             defaultValue: Sequelize.NOW
         },
@@ -23,7 +23,15 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.DATE(),
             defaultValue: Sequelize.NOW
         },
+        value_multiplier: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+        },
         multiplier: {
+            type: Sequelize.STRING,
+            allowNull: false
+        },
+        db_multiplier: {
             type: Sequelize.STRING,
             allowNull: false
         },

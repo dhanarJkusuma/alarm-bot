@@ -17,17 +17,21 @@ exports.recordReminder = async (data) => {
                 error: error_msg
             };
         }
+        let dbMultiplier = parseDBMultiplier(data.multiplier);
+        let valueMultiplier = parseMultiplierValue(data.multiplier);
         await Scheduler.create({
             user_id: data.user_id,
             name: data.name,
-            last_executed: data.executed,
+            scheduled_at: nextDate,
             next_execute: nextDate,
-            multiplier: data.multiplier
+            multiplier: data.multiplier,
+            db_multiplier: dbMultiplier,
+            value_multiplier: valueMultiplier
         });
 
         success = true;
     }catch(error){
-        console.log('[Mei Bot] error while creating record', error);
+        console.log('[Reminder Bot] error while creating record', error);
         if (error instanceof Sequelize.UniqueConstraintError){
             error_msg = "Duplicate Name!";
         }else{
@@ -49,7 +53,7 @@ exports.fetchReminder = async (uid) => {
         schedulers = await Scheduler.findAll({ where: { user_id: uid }, raw: true });
 
     }catch(error){
-        console.log('[Mei Bot] error while fetching record. Error: ', error);
+        console.log('[Reminder Bot] error while fetching record. Error: ', error);
         success = false;
         error_msg = "Internal System Error";
     }
@@ -72,7 +76,7 @@ exports.remove = async (uid, name) => {
 
         success = true;
     }catch(error){
-        console.log('[Mei Bot] error while deleting record', error);
+        console.log('[Reminder Bot] error while deleting record', error);
         error_msg = "Internal System Error";
     }
 
@@ -95,7 +99,7 @@ exports.show = async (uid, name) => {
         }
 
     }catch(error){
-        console.log('[Mei Bot] error while fetching record', error);
+        console.log('[Reminder Bot] error while fetching record', error);
         error_msg = "Internal System Error";
         success = false;
     }
@@ -162,7 +166,7 @@ exports.skip = async (data) => {
         await transaction.commit();
 
     } catch (error) {
-        console.log('[Mei Bot] error while skip reminder record', error);
+        console.log('[Reminder Bot] error while skip reminder record', error);
         if (transaction) await transaction.rollback();
 
         error_msg = "Internal System Error";
@@ -212,10 +216,12 @@ exports.confirm = async (uid, name) => {
             };
         }
 
-        next = parseMultiplier(scheduler.last_executed, scheduler.multiplier);
+        next = parseMultiplier(scheduler.scheduled_at, scheduler.multiplier);
         scheduler.next_execute = next;
+        scheduler.scheduled_at = next;
         await Scheduler.update({
-            next_execute: next
+            next_execute: next,
+
         }, { 
             where: { id: scheduler.id }, 
             transaction 
@@ -223,7 +229,7 @@ exports.confirm = async (uid, name) => {
         await transaction.commit();
 
     } catch (error) {
-        console.log('[Mei Bot] error while conrim reminder record', error);
+        console.log('[Reminder Bot] error while conrim reminder record', error);
         if (transaction) await transaction.rollback();
 
         error_msg = "Internal System Error";
@@ -250,7 +256,7 @@ exports.reminder = async (from, end) => {
         }, raw: true });
 
     }catch(error){
-        console.log('[Mei Bot] error while fetching reminder records. Error: ', error);
+        console.log('[Reminder Bot] error while fetching reminder records. Error: ', error);
         success = false;
         error_msg = "Internal System Error";
     }
@@ -260,6 +266,13 @@ exports.reminder = async (from, end) => {
         error: error_msg,
         data: schedulers
     }
+}
+
+exports.reload = async () => {
+    // UPDATE scheduler s SET s.next_executed = DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier s.multiplier) WHERE s.next_executed < NOW();
+    const [results, metadata] = await sequelize.query("UPDATE schedulers s SET s.next_executed = DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier s.multiplier) WHERE s.next_executed < NOW()");
+    console.log(results);
+    console.log(metadata);
 }
 
 const getFlag = (multiplier) => {
@@ -289,9 +302,28 @@ const parseMultiplier = (date, multiplier) => {
     }
 }
 
+const parseDBMultiplier = (multiplier) => {
+    let m = multiplier.substr(multiplier.length - 1);
+    switch(m){
+        case "w":
+            return "WEEK";
+        case "d":
+            return "DAY";
+        case "h":
+            return "HOUR";
+        default:
+            return null;
+    }
+}
+
+const parseMultiplierValue = (multiplier) => {
+    let v = multiplier.length == 1 ? 1 : parseInt(multiplier.substr(0, multiplier.length - 1));
+    return v;
+}
+
 const parseMultiplierDescription = (multiplier) => {
     let m = multiplier.substr(multiplier.length - 1);
-    let v = multiplier.length == 1 ? 1 : parseInt(multiplier.substr(0, multiplier.length - 1));
+    let v = parseMultiplierValue(multiplier);
     switch(m){
         case "w":
             return `Will remind you every ${v} week(s)`;
