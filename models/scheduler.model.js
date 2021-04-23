@@ -44,7 +44,7 @@ module.exports = (sequelize, Sequelize) => {
             },
             {
                 name: 'reminder_idx',
-                fields: ['next_execute', 'confirmed']
+                fields: ['next_execute']
             }
         ],
     });
