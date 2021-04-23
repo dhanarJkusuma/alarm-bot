@@ -1,7 +1,7 @@
 const reminderCtrl = require('../controllers/reminder.controller');
 
-const sendError = (uid, message) => {
-    message = `Hello <@${uid}>, \nError while record your reminder :cry:  \nError: ${message} \n`;
+const sendError = (uid, msg) => {
+    let message = `Hello <@${uid}>, \nError while record your reminder :cry:  \nError: ${msg} \n`;
     msg.channel.send(message);
 }
 
