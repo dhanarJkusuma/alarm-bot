@@ -34,6 +34,11 @@ module.exports = {
         let m = flag.substr(flag.length - 1);
         switch(m){
             case "d":
+                if(value < 0.5){
+                    sendError(msg, uid, `Please input with multipler with a proper integer value`);
+                    return;
+                }
+                break;
             case "w":
                 if(value < 1){
                     sendError(msg, uid, `Please input with multipler with a proper integer value`);
@@ -41,8 +46,8 @@ module.exports = {
                 }
                 break;
             case "h":
-                if(value < 24){
-                    sendError(msg, uid, `Please input with multipler with at least 24 hours / 1 day reminder`);
+                if(value < 12){
+                    sendError(msg, uid, `Please input with multipler with at least 12 hours / 0.5 day reminder`);
                     return;
                 }
                 break;

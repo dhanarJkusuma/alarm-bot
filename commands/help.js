@@ -5,7 +5,7 @@ module.exports = {
     description: 'Help func',
     async execute(msg, args) {
 
-        var message = `Welcome from mei bot :smile: \n`;
+        var message = `Hello from alarm-bot :smile: \n`;
         message += `You can call me using this message:\n`;
         message += "```@alarm-bot <method> <args>```";
         message += `\n`;

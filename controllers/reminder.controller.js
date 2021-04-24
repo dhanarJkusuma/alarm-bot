@@ -271,22 +271,24 @@ exports.reminder = async (from, end) => {
 }
 
 exports.reload = async () => {
-    /**  
+    let query = `
         UPDATE schedulers s SET 
             s.next_execute = 
                 CASE 
                     WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) 
-                    WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY) 
+                    WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY)
+                    WHEN s.db_multipler='HOUR' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier HOUR) 
                 END,
             s.scheduled_at = 
                 CASE 
                     WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) 
-                    WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY) 
+                    WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY)
+                    WHEN s.db_multipler='HOUR' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier HOUR)
                 END 
         WHERE s.next_execute < NOW()
-    */ 
+    `;
     // const [results, metadata] = 
-    await sequelize.query(`UPDATE schedulers s SET s.next_execute = CASE WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY) END, s.scheduled_at = CASE WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY) END WHERE s.next_execute < NOW()`);
+    await sequelize.query(query);
     // console.log(results);
     // console.log(metadata);
 }
