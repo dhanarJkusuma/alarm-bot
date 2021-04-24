@@ -74,7 +74,8 @@ Cron.schedule('* * * * *',  async function() {
 });
 
 
-Cron.schedule('0 1 * * *', async function(){
+// run reload every 12H
+Cron.schedule('0 */12 * * *', async function(){
     console.log('[Reminder Bot] Reload all called alarm:');
     await reminderCtrl.reload();
 });
