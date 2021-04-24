@@ -22,6 +22,7 @@ module.exports = {
         message += `d: Day \n`;
         message += `h: Hour \n`;
         message += `example: 1h, 2d, 1w`;
+        message += `Note: you can only create reminder within at least 12h reminder`;
         
         msg.channel.send(message);
     },
