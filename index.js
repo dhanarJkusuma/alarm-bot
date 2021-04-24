@@ -41,6 +41,7 @@ bot.on('message', msg => {
 /** Cron */
 const reminderCtrl = require('./controllers/reminder.controller');
 
+// run every minutes
 Cron.schedule('* * * * *',  async function() {
     try{
         if(process.env.DEBUG === 'true'){
