@@ -303,21 +303,24 @@ const parseMultiplier = (date, multiplier) => {
         return null;
     }
     let m = multiplier.substr(multiplier.length - 1);
-    let v = parseInt(value);
+    let v = Number(value);
     let d = new Date(date);
+    var valueInHour = 0;
     switch(m){
         case "w":
-            d.setDate(d.getDate() + v * 7);
-            return d;
+            valueInHour = 24 * 7 * v;
+            break;
         case "d":
-            d.setDate(d.getDate() + v);
-            return d;
+            valueInHour = 24 * v;
+            break;
         case "h":
-            d.setHours(d.getHours() + v);
-            return d;
+            valueInHour = v;
+            break;
         default:
             return null;
     }
+    d.setHours(d.getHours() + valueInHour);
+    return d;
 }
 
 const parseDBMultiplier = (multiplier) => {
@@ -335,7 +338,7 @@ const parseDBMultiplier = (multiplier) => {
 }
 
 const parseMultiplierValue = (multiplier) => {
-    let v = multiplier.length == 1 ? 1 : parseInt(multiplier.substr(0, multiplier.length - 1));
+    let v = multiplier.length == 1 ? 1 : Number(multiplier.substr(0, multiplier.length - 1));
     return v;
 }
 
