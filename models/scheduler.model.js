@@ -24,7 +24,7 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: Sequelize.NOW
         },
         value_multiplier: {
-            type: Sequelize.INTEGER,
+            type: Sequelize.FLOAT,
             allowNull: false
         },
         multiplier: {
