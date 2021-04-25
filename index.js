@@ -57,17 +57,26 @@ Cron.schedule('* * * * *',  async function() {
             return;
         }
         
-        var message = `Hi, \nJust remind you about: \n`;
+        
+        var message = `Just remind you about: \n`;
         for (i = 0; i < reminders.data.length; i++) {
             let item = reminders.data[i];
             let hours = (now - item.next_execute) / 36e5;
             
-            if(hours <= parseInt(process.env.MAX_COUNTER)){
-                message += `>> <@${item.user_id}> : ${item.name}\n`;
+            if(hours <= parseInt(process.env.MAX_COUNTER) || item.scheduled_at <= now){
+                message += `${i+1}.\t<@${item.user_id}> :: ${item.name}\n`;
             }
         }
-        message += `Please confirm to stop your reminder, or skip to remind you later.`;
-        bot.channels.cache.get(process.env.CHANNEL_ID).send(message); 
+        message += `Please use confirm command to stop your reminder, or skip command to remind you later.`;
+
+        const embedMessage = {
+            color: 0x0099ff,
+            title: "Notification",
+            description: message,
+            timestamp: new Date()
+        };
+        bot.channels.cache.get(process.env.CHANNEL_ID).send({ embed: embedMessage }); 
+        await reminderCtrl.reload();
     }catch(error){
         console.log("[Reminder Bot] error cron: ", error);
     }
@@ -75,7 +84,7 @@ Cron.schedule('* * * * *',  async function() {
 
 
 // run reload every 12H
-Cron.schedule('0 */12 * * *', async function(){
-    console.log('[Reminder Bot] Reload all called alarm:');
-    await reminderCtrl.reload();
-});
+// Cron.schedule('0 */12 * * *', async function(){
+//     console.log('[Reminder Bot] Reload all called alarm:');
+//     await reminderCtrl.reload();
+// });

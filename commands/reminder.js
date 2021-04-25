@@ -24,6 +24,10 @@ module.exports = {
         const now = new Date();
         const name = args[0];
         const flag = args[1];
+        var date = null;
+        if(args.length > 2){
+            date = new Date(args[2]);
+        }
 
         // validate multiplier
         let value = flag.substr(0, flag.length - 1);
@@ -34,20 +38,15 @@ module.exports = {
         let m = flag.substr(flag.length - 1);
         switch(m){
             case "d":
-                if(value < 0.5){
-                    sendError(msg, uid, `Please input with multipler with a proper integer value`);
-                    return;
-                }
-                break;
             case "w":
                 if(value < 1){
-                    sendError(msg, uid, `Please input with multipler with a proper integer value`);
+                    sendError(msg, uid, `Please input multipler with a proper integer value`);
                     return;
                 }
                 break;
             case "h":
                 if(value < 12){
-                    sendError(msg, uid, `Please input with multipler with at least 12 hours / 0.5 day reminder`);
+                    sendError(msg, uid, `Please input multipler with at least 12 hour(s) reminder`);
                     return;
                 }
                 break;
@@ -57,7 +56,8 @@ module.exports = {
             user_id: uid,
             name: name,
             executed: now,
-            multiplier: flag
+            multiplier: flag,
+            customDate: date
         });
 
         var message;

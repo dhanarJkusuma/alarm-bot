@@ -1,4 +1,6 @@
+const { DatabaseError } = require("sequelize");
 const Sequelize = require("sequelize");
+const db = require("../models");
 const { sequelize } = require("../models");
 
 const model = require("../models");
@@ -10,24 +12,29 @@ exports.recordReminder = async (data) => {
     var error_msg = "";
 
     try{
-        const nextDate = parseMultiplier(data.executed, data.multiplier);
-        if(nextDate == null){
-            error_msg = "Please input with proper repeat flag";
-            return {
-                success,
-                error: error_msg
-            };
+        var nextDate = null;
+        if(data.customDate != null){
+            nextDate = data.customDate;
+        }else{
+            nextDate = parseMultiplier(data.executed, data.multiplier);
+            if(nextDate == null){
+                error_msg = "Please input with proper repeat flag";
+                return {
+                    success,
+                    error: error_msg
+                };
+            }
         }
+        
         let dbMultiplier = parseDBMultiplier(data.multiplier);
-        let valueMultiplier = parseMultiplierValue(data.multiplier);
         await Scheduler.create({
             user_id: data.user_id,
             name: data.name,
             scheduled_at: nextDate,
             next_execute: nextDate,
             multiplier: data.multiplier,
-            db_multiplier: dbMultiplier,
-            value_multiplier: valueMultiplier
+            db_multiplier: dbMultiplier.multiplier,
+            value_multiplier: dbMultiplier.value
         });
 
         success = true;
@@ -247,15 +254,28 @@ exports.confirm = async (uid, name) => {
 }
 
 exports.reminder = async (from, end) => {
+
     var success = true;
     var error_msg = "";
     var schedulers = [];
     try{
-        schedulers = await Scheduler.findAll({ where: { 
-            next_execute: {
-                [Op.between]: [from, end]
-            },
-        }, raw: true });
+        schedulers = await Scheduler.findAll({ 
+            where: { 
+                [Op.or]: [ 
+                    {
+                        scheduled_at: {
+                            [Op.lte]: (new Date())
+                        }
+                    }, 
+                    {
+                        next_execute: {
+                            [Op.between]: [from, end]
+                        }
+                    }
+                ]
+            }, 
+            raw: true 
+        });
 
     }catch(error){
         console.log('[Reminder Bot] error while fetching reminder records. Error: ', error);
@@ -273,19 +293,13 @@ exports.reminder = async (from, end) => {
 exports.reload = async () => {
     let query = `
         UPDATE schedulers s SET 
-            s.next_execute = 
-                CASE 
-                    WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) 
-                    WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY)
-                    WHEN s.db_multipler='HOUR' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier HOUR) 
-                END,
             s.scheduled_at = 
                 CASE 
                     WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) 
                     WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY)
-                    WHEN s.db_multipler='HOUR' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier HOUR)
+                    WHEN s.db_multiplier='HOUR' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier HOUR)
                 END 
-        WHERE s.next_execute < NOW()
+        WHERE s.scheduled_at < NOW()
     `;
     // const [results, metadata] = 
     await sequelize.query(query);
@@ -325,13 +339,24 @@ const parseMultiplier = (date, multiplier) => {
 
 const parseDBMultiplier = (multiplier) => {
     let m = multiplier.substr(multiplier.length - 1);
+    let v = parseMultiplierValue(multiplier);
+
     switch(m){
         case "w":
-            return "WEEK";
+            return {
+                value: v,
+                multiplier: "WEEK"
+            };
         case "d":
-            return "DAY";
+            return {
+                value: v,
+                multiplier: "DAY"
+            };
         case "h":
-            return "HOUR";
+            return {
+                value: v,
+                multiplier: "HOUR"
+            };
         default:
             return null;
     }
