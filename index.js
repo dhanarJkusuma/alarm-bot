@@ -19,7 +19,7 @@ bot.login(TOKEN);
 
 /** Log User Login */
 bot.on('ready', () => {
-    bot.user.setActivity('Run command `@alarm-bot help` for help', { type: 'PLAYING' });
+    bot.user.setActivity('`@alarm-bot help` for help', { type: 'PLAYING' });
     console.info(`Logged in as ${bot.user.tag}!`);
 });
 
