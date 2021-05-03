@@ -57,8 +57,7 @@ Cron.schedule('* * * * *',  async function() {
         if(reminders.data.length == 0){
             return;
         }
-        
-        
+        await reminderCtrl.reload();
         var message = `Just remind you about: \n`;
         for (i = 0; i < reminders.data.length; i++) {
             let item = reminders.data[i];
@@ -77,7 +76,7 @@ Cron.schedule('* * * * *',  async function() {
             timestamp: new Date()
         };
         bot.channels.cache.get(process.env.CHANNEL_ID).send({ embed: embedMessage }); 
-        await reminderCtrl.reload();
+        
     }catch(error){
         console.log("[Reminder Bot] error cron: ", error);
     }
