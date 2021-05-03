@@ -298,6 +298,12 @@ exports.reload = async () => {
                     WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) 
                     WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY)
                     WHEN s.db_multiplier='HOUR' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier HOUR)
+                END,
+            s.next_execute =
+                CASE 
+                    WHEN s.db_multiplier='WEEK' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier WEEK) 
+                    WHEN s.db_multiplier='DAY' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier DAY)
+                    WHEN s.db_multiplier='HOUR' THEN DATE_ADD(s.scheduled_at, INTERVAL s.value_multiplier HOUR)
                 END 
         WHERE s.scheduled_at < NOW()
     `;
